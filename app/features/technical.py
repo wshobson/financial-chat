@@ -13,4 +13,10 @@ def add_technicals(df):
     df["52_WK_HIGH"] = df["close"].rolling(window=252).max()
     df["52_WK_LOW"] = df["close"].rolling(window=252).min()
 
+    daily_range = df["high"] - df["low"]
+    adr = daily_range.rolling(window=20).mean()
+
+    df["ADR"] = (adr / df["close"]) * 100
+    df["ADR_PCT"] = df["ADR"].fillna(0)
+
     return df
