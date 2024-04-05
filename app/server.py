@@ -1,5 +1,6 @@
 import os
 import warnings
+import pandas as pd
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
@@ -9,16 +10,20 @@ from fastapi.responses import RedirectResponse
 from langserve import add_routes
 from openbb import obb
 
-from app.chains.agent import agent_executor as agent_chain
+from app.chains.agent import get_anthropic_agent_executor_chain
 
 
 OPENBB_API_TOKEN = os.environ.get("OPENBB_API_TOKEN")
 obb.account.login(pat=OPENBB_API_TOKEN, remember_me=True)
 
+pd.set_option("display.max_columns", None)
+pd.set_option("display.max_rows", None)
+pd.set_option("display.max_colwidth", None)
+
 app = FastAPI(
-    title="Finance Chat 2000",
+    title="Financial Chat",
     version="1.0",
-    description="The trading dude abides.",
+    description="The Trading Dude Abides",
 )
 
 app.add_middleware(
@@ -38,7 +43,7 @@ async def redirect_root_to_docs():
 
 add_routes(
     app,
-    agent_chain,
+    get_anthropic_agent_executor_chain(),
     path="/agent",
 )
 
