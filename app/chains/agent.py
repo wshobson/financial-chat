@@ -20,8 +20,7 @@ from app.tools.stock_stats import (
 load_dotenv()
 
 HUMAN_TEMPLATE = """
-You are a large language model trained by OpenAI, specialized as a financial advisor 
-with advanced knowledge of trading, investing, quantitative finance, technical analysis, and fundamental analysis.
+You are a specialized as a financial advisor with advanced knowledge of trading, investing, quantitative finance, technical analysis, and fundamental analysis.
 
 You should never perform any math on your own, but rather use the tools available to you to perform all calculations.
 
@@ -114,7 +113,6 @@ def create_anthropic_agent_executor():
     llm = ChatAnthropic(
         temperature=0,
         model_name="claude-3-opus-20240229",
-        # model_name="claude-3-haiku-20240307",
         streaming=True,
         max_tokens=4096,
     )
@@ -136,18 +134,5 @@ class AgentInput(BaseModel):
 
 
 def get_anthropic_agent_executor_chain():
-    llm = ChatAnthropic(
-        temperature=0,
-        model_name="claude-3-opus-20240229",
-        # model_name="claude-3-haiku-20240307",
-        streaming=True,
-        max_tokens=4096,
-    )
-    tools = get_tools(llm)
-    agent = create_xml_agent(llm, tools, get_prompt())
-
-    return AgentExecutor.from_agent_and_tools(
-        agent=agent,
-        tools=tools,
-        verbose=True,
-    ).with_types(input_type=AgentInput) | (lambda x: x["output"])
+    executor = create_anthropic_agent_executor()
+    return executor.with_types(input_type=AgentInput) | (lambda x: x["output"])
