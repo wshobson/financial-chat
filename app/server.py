@@ -9,12 +9,16 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from langserve import add_routes
 from openbb import obb
+from dotenv import load_dotenv
+
 
 from app.chains.agent import get_anthropic_agent_executor_chain
 
+load_dotenv()
 
-OPENBB_API_TOKEN = os.environ.get("OPENBB_API_TOKEN")
-obb.account.login(pat=OPENBB_API_TOKEN, remember_me=True)
+OPENBB_TOKEN = os.environ.get("OPENBB_TOKEN")
+obb.account.login(pat=OPENBB_TOKEN)
+obb.user.credentials.tiingo_token = os.environ.get("TIINGO_API_KEY")
 
 pd.set_option("display.max_columns", None)
 pd.set_option("display.max_rows", None)

@@ -15,7 +15,9 @@ from app.tools.stock_stats import (
     get_stock_quantstats,
     get_stock_ratios,
     get_key_metrics,
+    get_stock_sector_info,
 )
+from app.tools.stock_sentiment import get_news_sentiment
 
 load_dotenv()
 
@@ -41,6 +43,7 @@ Rules for bullish setups based on the stock's most recent closing price:
 8. Stock's closing price is within 25 percent of its 52-week high.
 9. Stock's 30-day average volume is greater than 750K.
 10. Stock's ADR percent is less than 5 percent and greater than 1 percent.
+11. Stock's trendline slope is positive and rising.
 
 PREPROCESSING:
 --------------
@@ -104,6 +107,8 @@ def get_tools(llm):
         get_key_metrics,
         get_gainers,
         get_losers,
+        get_stock_sector_info,
+        get_news_sentiment,
         tavily,
     ]
     return tools

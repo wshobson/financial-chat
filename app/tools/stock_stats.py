@@ -119,3 +119,18 @@ def get_key_metrics(symbol: str) -> str:
         return wrap_dataframe(metrics)
     except Exception as e:
         return f"\n<observation>\nError: {e}</observation>\n"
+
+
+@tool(args_schema=StockStatsInput)
+def get_stock_sector_info(symbol: str) -> str:
+    """Fetch a Stock's Sector Information by Symbol."""
+
+    try:
+        profile = obb.equity.profile(symbol=symbol).to_df()
+
+        if profile.empty:
+            return f"\n<observation>\nNo data found for the given symbol {symbol}</observation>\n"
+
+        return wrap_dataframe(profile)
+    except Exception as e:
+        return f"\n<observation>\nError: {e}</observation>\n"

@@ -28,6 +28,8 @@ yfinance = "^0.2.37"
 streamlit = "^1.33.0"
 watchdog = "^4.0.0"
 numexpr = "^2.10.0"
+scikit-learn = "^1.4.1.post1"
+vadersentiment = "^3.3.2"
 
 
 [build-system]

@@ -1,4 +1,17 @@
 import pandas_ta as ta
+import numpy as np
+from sklearn.linear_model import LinearRegression
+
+
+def detect_trendline(df):
+    X = np.array(range(len(df))).reshape((-1, 1))
+    y = df["close"].values.reshape((-1, 1))
+
+    model = LinearRegression()
+    model.fit(X, y)
+    slope = model.coef_[0][0]
+
+    return slope
 
 
 def add_technicals(df):
@@ -18,5 +31,7 @@ def add_technicals(df):
 
     df["ADR"] = (adr / df["close"]) * 100
     df["ADR_PCT"] = df["ADR"].fillna(0)
+
+    df["TRENDLINE_SLOPE"] = detect_trendline(df)
 
     return df
