@@ -4,7 +4,7 @@ import pandas as pd
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
-from langchain_community.callbacks import StreamlitCallbackHandler
+from langchain_community.callbacks.streamlit import StreamlitCallbackHandler
 from langchain_core.runnables import RunnableConfig
 from openbb import obb
 from dotenv import load_dotenv
@@ -33,7 +33,7 @@ st.set_page_config(
 if "agent_executor" not in st.session_state:
     st.session_state.agent_executor = create_anthropic_agent_executor()
 
-st.title("Financial Chat, your AI financial advisor")
+st.title("Financial Chat, your AI financial advisor 📈")
 
 if "messages" not in st.session_state:
     st.session_state.messages = [
@@ -53,10 +53,11 @@ with st.form(key="form"):
 output_container = st.empty()
 if with_clear_container(submit_clicked):
     output_container = output_container.container()
-    output_container.chat_message("user").write(user_input)
+
+    output_container.markdown(f"**User:** {user_input}")
     st.session_state.messages.append({"role": "user", "content": user_input})
 
-    answer_container = output_container.chat_message("assistant", avatar="🦜")
+    answer_container = output_container.chat_message("assistant", avatar="💸")
     st_callback = StreamlitCallbackHandler(answer_container)
 
     cfg = RunnableConfig()
@@ -70,4 +71,4 @@ if with_clear_container(submit_clicked):
         st.session_state.messages.append(
             {"role": "assistant", "content": answer["output"]}
         )
-        answer_container.write(answer["output"])
+        answer_container.markdown(f"**Assistant:** {answer['output']}")
