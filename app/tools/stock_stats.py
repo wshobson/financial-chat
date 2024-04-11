@@ -38,7 +38,7 @@ def get_stock_price_history(symbol: str) -> str:
 
 @tool(args_schema=StockStatsInput)
 def get_stock_quantstats(symbol: str) -> str:
-    """Fetch a Stock's Quantitative Statistics by Symbol."""
+    """Fetch a Stock's Portfolio Analytics For Quants by Symbol."""
 
     try:
         start_date = (datetime.now() - timedelta(days=365 * 2)).strftime("%Y-%m-%d")
@@ -63,7 +63,7 @@ def get_stock_quantstats(symbol: str) -> str:
 
 @tool
 def get_gainers() -> str:
-    """Fetch Stock Market's Top Gainers."""
+    """Fetch Top Price Gainers in the Stock Market."""
 
     try:
         gainers = obb.equity.discovery.gainers(sort="desc").to_df()
@@ -93,7 +93,7 @@ def get_losers() -> str:
 
 @tool(args_schema=StockStatsInput)
 def get_stock_ratios(symbol: str) -> str:
-    """Fetch a Stock's Ratios by Symbol."""
+    """Fetch an Extensive Set of Financial and Accounting Ratios for a Given Company Over Time."""
 
     try:
         trades = obb.equity.fundamental.ratios(symbol=symbol).to_df()
@@ -108,10 +108,12 @@ def get_stock_ratios(symbol: str) -> str:
 
 @tool(args_schema=StockStatsInput)
 def get_key_metrics(symbol: str) -> str:
-    """Fetch a Stock's Key Metrics by Symbol."""
+    """Fetch Fundamental Metrics by Symbol."""
 
     try:
-        metrics = obb.equity.fundamental.metrics(symbol=symbol).to_df()[::-1]
+        metrics = obb.equity.fundamental.metrics(symbol=symbol, with_ttm=True).to_df()[
+            ::-1
+        ]
 
         if metrics.empty:
             return f"\n<observation>\nNo data found for the given symbol {symbol}</observation>\n"
@@ -123,7 +125,7 @@ def get_key_metrics(symbol: str) -> str:
 
 @tool(args_schema=StockStatsInput)
 def get_stock_sector_info(symbol: str) -> str:
-    """Fetch a Stock's Sector Information by Symbol."""
+    """Fetch a Company's General Information By Symbol. This includes company name, industry, and sector data."""
 
     try:
         profile = obb.equity.profile(symbol=symbol).to_df()
@@ -132,5 +134,20 @@ def get_stock_sector_info(symbol: str) -> str:
             return f"\n<observation>\nNo data found for the given symbol {symbol}</observation>\n"
 
         return wrap_dataframe(profile)
+    except Exception as e:
+        return f"\n<observation>\nError: {e}</observation>\n"
+
+
+@tool(args_schema=StockStatsInput)
+def get_valuation_multiples(symbol: str) -> str:
+    """Fetch a Company's Valuation Multiples by Symbol."""
+
+    try:
+        df = obb.equity.fundamental.multiples(symbol=symbol).to_df()
+
+        if df.empty:
+            return f"\n<observation>\nNo data found for the given symbol {symbol}</observation>\n"
+
+        return wrap_dataframe(df)
     except Exception as e:
         return f"\n<observation>\nError: {e}</observation>\n"

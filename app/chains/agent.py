@@ -16,6 +16,7 @@ from app.tools.stock_stats import (
     get_stock_ratios,
     get_key_metrics,
     get_stock_sector_info,
+    get_valuation_multiples,
 )
 from app.tools.stock_sentiment import get_news_sentiment
 
@@ -101,14 +102,15 @@ def get_tools(llm):
     tavily = TavilySearchResults(max_results=1)
 
     tools = [
+        get_valuation_multiples,
         get_stock_price_history,
         get_stock_quantstats,
-        get_stock_ratios,
-        get_key_metrics,
         get_gainers,
         get_losers,
         get_stock_sector_info,
         get_news_sentiment,
+        get_stock_ratios,
+        get_key_metrics,
         tavily,
     ]
     return tools
