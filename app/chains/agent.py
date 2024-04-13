@@ -2,7 +2,7 @@ from typing import List, Tuple
 
 from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_anthropic import ChatAnthropic
-from langchain.agents import AgentExecutor, create_xml_agent
+from langchain.agents import AgentExecutor, create_tool_calling_agent
 from langchain_community.tools.tavily_search import TavilySearchResults
 from langchain_core.prompts import ChatPromptTemplate
 
@@ -19,10 +19,11 @@ from app.tools.stock_stats import (
     get_valuation_multiples,
 )
 from app.tools.stock_sentiment import get_news_sentiment
+from app.tools.stock_relative_strength import get_relative_strength
 
 load_dotenv()
 
-HUMAN_TEMPLATE = """
+SYSTEM_TEMPLATE = """
 You are a specialized financial advisor with advanced knowledge of trading, investing, quantitative finance, technical analysis, and fundamental analysis.
 
 You should never perform any math on your own, but rather use the tools available to you to perform all calculations.
@@ -45,63 +46,32 @@ Rules for bullish setups based on the stock's most recent closing price:
 9. Stock's 30-day average volume is greater than 750K.
 10. Stock's ADR percent is less than 5 percent and greater than 1 percent.
 11. Stock's trendline slope is positive and rising.
+12. Stock's relative strength rank is above 80.
 
 PREPROCESSING:
 --------------
 
 Before processing the query, you will preprocess it as follows:
 1. Correct any spelling errors using a spell checker or fuzzy matching technique.
-2. If the stock symbol or company name is a partial match, find the closest matching stock symbol or company name.
-
-TOOLS:
-------
-
-You have access to the following tools:
-
-{tools}
-
-When accessing your tools, please use as many tools as necessary to provide the most accurate and relevant information.
-
-IMPORTANT: In order to use a tool, you MUST use the following format:
-<tool>tool_name</tool>
-<tool_input>input_for_the_tool</tool_input>
-
-You will then get back a response in the form:
-<observation>output_from_the_tool</observation>
-
-For example, if you have a tool called 'search' that could run a google search, in order to search for the weather in SF you would respond:
-
-<tool>search</tool>
-<tool_input>weather in SF</tool_input>
-<observation>64 degrees</observation>
-
-When you are done, respond with a final answer between <final_answer></final_answer>. 
-
-For example:
-
-<final_answer>The weather in SF is 64 degrees</final_answer>
-
-Begin!
-
-Previous Conversation:
-
-{chat_history}
-
-Question: {input}
-{agent_scratchpad}"""
+2. If the stock symbol or company name is a partial match, find the closest matching stock symbol or company name."""
 
 
 def get_prompt():
-    # return PromptTemplate.from_template(HUMAN_TEMPLATE)
-    return ChatPromptTemplate.from_template(HUMAN_TEMPLATE)
+    return ChatPromptTemplate.from_messages(
+        [
+            ("user", SYSTEM_TEMPLATE),
+            ("placeholder", "{chat_history}"),
+            ("human", "{input}"),
+            ("placeholder", "{agent_scratchpad}"),
+        ]
+    )
 
 
 def get_tools(llm):
-    """Tools for Claude 3"""
-
     tavily = TavilySearchResults(max_results=1)
 
     tools = [
+        get_relative_strength,
         get_valuation_multiples,
         get_stock_price_history,
         get_stock_quantstats,
@@ -120,11 +90,13 @@ def create_anthropic_agent_executor():
     llm = ChatAnthropic(
         temperature=0,
         model_name="claude-3-opus-20240229",
-        streaming=True,
         max_tokens=4096,
     )
+
     tools = get_tools(llm)
-    agent = create_xml_agent(llm, tools, get_prompt())
+    prompt = get_prompt()
+
+    agent = create_tool_calling_agent(llm, tools, prompt)
 
     return AgentExecutor.from_agent_and_tools(
         agent=agent,
