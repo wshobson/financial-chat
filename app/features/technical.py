@@ -16,7 +16,6 @@ def detect_trendline(df):
 
 def add_technicals(df):
     df["pct_change"] = df["close"].pct_change() * 100
-    df["current_date"] = df.index.strftime("%Y-%m-%d")
     df["SMA_20"] = ta.sma(df["close"], length=20)
     df["SMA_50"] = ta.sma(df["close"], length=50)
     df["SMA_150"] = ta.sma(df["close"], length=150)

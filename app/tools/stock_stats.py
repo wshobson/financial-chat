@@ -26,14 +26,14 @@ def get_stock_price_history(symbol: str) -> str:
         df.index = pd.to_datetime(df.index)
 
         if df.empty:
-            return "\n<observation>\nNo data found for the given symbol</observation>\n"
+            return "\n<observation>\nNo data found for the given symbol\n</observation>\n"
 
         df = add_technicals(df)
         df = df[-30:][::-1]
 
         return wrap_dataframe(df)
     except Exception as e:
-        return f"\n<observation>\nError: {e}</observation>\n"
+        return f"\n<observation>\nError: {e}\n</observation>\n"
 
 
 @tool(args_schema=StockStatsInput)
@@ -48,7 +48,7 @@ def get_stock_quantstats(symbol: str) -> str:
         df.index = pd.to_datetime(df.index)
 
         if df.empty:
-            return f"\n<observation>\nNo data found for the given symbol {symbol}</observation>\n"
+            return f"\n<observation>\nNo data found for the given symbol {symbol}\n</observation>\n"
 
         stock_ret = qs.utils.download_returns(symbol, period=df.index)
         bench_ret = qs.utils.download_returns("^GSPC", period=df.index)
@@ -56,9 +56,9 @@ def get_stock_quantstats(symbol: str) -> str:
             stock_ret, mode="full", benchmark=bench_ret, display=False
         )
 
-        return f"\n<observation>\n\n{stats}\n\n</observation>\n"
+        return f"\n<observation>\n{stats}\n</observation>\n"
     except Exception as e:
-        return f"\n<observation>\nError: {e}\n\n</observation>\n"
+        return f"\n<observation>\nError: {e}\n</observation>\n"
 
 
 @tool
@@ -69,11 +69,11 @@ def get_gainers() -> str:
         gainers = obb.equity.discovery.gainers(sort="desc").to_df()
 
         if gainers.empty:
-            return "\n<observation>\nNo gainers found</observation>\n"
+            return "\n<observation>\nNo gainers found\n</observation>\n"
 
         return wrap_dataframe(gainers)
     except Exception as e:
-        return f"\n<observation>\nError: {e}</observation>\n"
+        return f"\n<observation>\nError: {e}\n</observation>\n"
 
 
 @tool
@@ -84,11 +84,11 @@ def get_losers() -> str:
         losers = obb.equity.discovery.losers(sort="desc").to_df()
 
         if losers.empty:
-            return "\n<observation>\nNo losers found</observation>\n"
+            return "\n<observation>\nNo losers found\n</observation>\n"
 
         return wrap_dataframe(losers)
     except Exception as e:
-        return f"\n<observation>\nError: {e}</observation>\n"
+        return f"\n<observation>\nError: {e}\n</observation>\n"
 
 
 @tool(args_schema=StockStatsInput)
@@ -99,11 +99,11 @@ def get_stock_ratios(symbol: str) -> str:
         trades = obb.equity.fundamental.ratios(symbol=symbol).to_df()
 
         if trades.empty:
-            return f"\n<observation>\nNo data found for the given symbol {symbol}</observation>\n"
+            return f"\n<observation>\nNo data found for the given symbol {symbol}\n</observation>\n"
 
         return wrap_dataframe(trades)
     except Exception as e:
-        return f"\n<observation>\nError: {e}</observation>\n"
+        return f"\n<observation>\nError: {e}\n</observation>\n"
 
 
 @tool(args_schema=StockStatsInput)
@@ -116,11 +116,11 @@ def get_key_metrics(symbol: str) -> str:
         ]
 
         if metrics.empty:
-            return f"\n<observation>\nNo data found for the given symbol {symbol}</observation>\n"
+            return f"\n<observation>\nNo data found for the given symbol {symbol}\n</observation>\n"
 
         return wrap_dataframe(metrics)
     except Exception as e:
-        return f"\n<observation>\nError: {e}</observation>\n"
+        return f"\n<observation>\nError: {e}\n</observation>\n"
 
 
 @tool(args_schema=StockStatsInput)
@@ -131,11 +131,11 @@ def get_stock_sector_info(symbol: str) -> str:
         profile = obb.equity.profile(symbol=symbol).to_df()
 
         if profile.empty:
-            return f"\n<observation>\nNo data found for the given symbol {symbol}</observation>\n"
+            return f"\n<observation>\nNo data found for the given symbol {symbol}\n</observation>\n"
 
         return wrap_dataframe(profile)
     except Exception as e:
-        return f"\n<observation>\nError: {e}</observation>\n"
+        return f"\n<observation>\nError: {e}\n</observation>\n"
 
 
 @tool(args_schema=StockStatsInput)
@@ -146,8 +146,8 @@ def get_valuation_multiples(symbol: str) -> str:
         df = obb.equity.fundamental.multiples(symbol=symbol).to_df()
 
         if df.empty:
-            return f"\n<observation>\nNo data found for the given symbol {symbol}</observation>\n"
+            return f"\n<observation>\nNo data found for the given symbol {symbol}\n</observation>\n"
 
         return wrap_dataframe(df)
     except Exception as e:
-        return f"\n<observation>\nError: {e}</observation>\n"
+        return f"\n<observation>\nError: {e}\n</observation>\n"

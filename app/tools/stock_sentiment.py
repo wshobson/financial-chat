@@ -33,7 +33,7 @@ def get_news_sentiment(symbol: str) -> str:
         df = obb.news.company(symbol=symbol, provider="tiingo", limit=10).to_df()
 
         if df.empty:
-            return "\n<observation>\nNo data found for the given symbol</observation>\n"
+            return "\n<observation>\nNo data found for the given symbol\n</observation>\n"
 
         if "text" in df.columns:
             df["sentiment_score"] = df["text"].apply(analyze_sentiment)
@@ -42,4 +42,4 @@ def get_news_sentiment(symbol: str) -> str:
 
         return wrap_dataframe(df)
     except Exception as e:
-        return f"\n<observation>\nError: {e}</observation>\n"
+        return f"\n<observation>\nError: {e}\n</observation>\n"

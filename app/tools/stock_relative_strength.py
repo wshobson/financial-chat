@@ -93,4 +93,4 @@ def get_relative_strength(symbol: str) -> str:
         rs_rating = calculate_rs_rating(symbol, session_intervals)
         return wrap_dataframe(rs_rating)
     except Exception as e:
-        return f"\n<observation>\nError: {e}</observation>\n"
+        return f"\n<observation>\nError: {e}\n</observation>\n"
