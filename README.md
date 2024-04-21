@@ -1,4 +1,4 @@
-# finance-chat
+# financial-chat
 
 A financial chat application powered by [LangChain](https://www.langchain.com/), [OpenBB](https://openbb.co/products/platform), and [Claude 3 Opus](https://www.anthropic.com/claude).
 
