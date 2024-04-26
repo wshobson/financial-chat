@@ -7,6 +7,7 @@ import quantstats as qs
 import pandas as pd
 
 from app.features.technical import add_technicals
+from app.features.screener import fetch_custom_universe
 from app.tools.utils import wrap_dataframe
 
 
@@ -26,7 +27,9 @@ def get_stock_price_history(symbol: str) -> str:
         df.index = pd.to_datetime(df.index)
 
         if df.empty:
-            return "\n<observation>\nNo data found for the given symbol\n</observation>\n"
+            return (
+                "\n<observation>\nNo data found for the given symbol\n</observation>\n"
+            )
 
         df = add_technicals(df)
         df = df[-30:][::-1]
@@ -149,5 +152,15 @@ def get_valuation_multiples(symbol: str) -> str:
             return f"\n<observation>\nNo data found for the given symbol {symbol}\n</observation>\n"
 
         return wrap_dataframe(df)
+    except Exception as e:
+        return f"\n<observation>\nError: {e}\n</observation>\n"
+
+
+@tool
+def get_stock_universe() -> str:
+    """Fetch the Trending Stocks Universe from FinViz."""
+
+    try:
+        return wrap_dataframe(fetch_custom_universe())
     except Exception as e:
         return f"\n<observation>\nError: {e}\n</observation>\n"

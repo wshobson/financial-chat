@@ -30,6 +30,7 @@ watchdog = "^4.0.0"
 numexpr = "^2.10.0"
 scikit-learn = "^1.4.1.post1"
 vadersentiment = "^3.3.2"
+finvizfinance = "^0.14.7"
 
 
 [build-system]
