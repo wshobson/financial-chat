@@ -11,6 +11,7 @@ If you're curious about the journey of building this project, check out these bl
 - [Improving the Edge: Trendlines, Sectors, and Sentiment](https://sethhobson.com/2024/04/improving-the-edge-trendlines-sectors-and-sentiment)
 - [Unlocking Alpha: Harnessing Relative Strength for AI-Driven Stock Selection](https://sethhobson.com/2024/04/unlocking-alpha-harnessing-relative-strength-for-ai-driven-stock-selection)
 - [Seeing the Bigger Picture: Adding Chart-Based Technical Analysis](https://sethhobson.com/2024/04/seeing-the-bigger-picture-adding-chart-based-technical-analysis)
+- [Empowering the AI Stock Analysis Agent with Universe Scanning](https://sethhobson.com/2024/04/empowering-the-ai-stock-analysis-agent-with-universe-scanning)
 
 ## Features
 
