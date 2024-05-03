@@ -12,6 +12,7 @@ If you're curious about the journey of building this project, check out these bl
 - [Unlocking Alpha: Harnessing Relative Strength for AI-Driven Stock Selection](https://sethhobson.com/2024/04/unlocking-alpha-harnessing-relative-strength-for-ai-driven-stock-selection)
 - [Seeing the Bigger Picture: Adding Chart-Based Technical Analysis](https://sethhobson.com/2024/04/seeing-the-bigger-picture-adding-chart-based-technical-analysis)
 - [Empowering the AI Stock Analysis Agent with Universe Scanning](https://sethhobson.com/2024/04/empowering-the-ai-stock-analysis-agent-with-universe-scanning)
+- [Risk Management in AI Stock Trading: A Key to Success](https://sethhobson.com/2024/05/risk-management-in-ai-stock-trading-a-key-to-success)
 
 ## Features
 
@@ -38,6 +39,8 @@ export OPENBB_TOKEN=<your-openbb-token>
 export TIINGO_API_KEY=<your-tiingo-api-key>
 export IMGUR_CLIENT_ID=<your-imgur-client-id>
 export IMGUR_CLIENT_SECRET=<your-imgur-client-secret>
+export FMP_API_KEY=<fmp-api-key>
+export INTRINIO_API_KEY=<intrinio-api-key>
 ```
 
 ## Usage
