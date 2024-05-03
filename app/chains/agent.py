@@ -22,6 +22,11 @@ from app.tools.stock_stats import (
 from app.tools.stock_sentiment import get_news_sentiment
 from app.tools.stock_relative_strength import get_relative_strength
 from app.tools.stock_charts import get_stock_chart_analysis
+from app.tools.risk_management import (
+    calculate_r_multiples,
+    calculate_technical_stops,
+    calculate_position_size,
+)
 
 load_dotenv()
 
@@ -86,6 +91,9 @@ def get_tools(llm):
         get_stock_ratios,
         get_key_metrics,
         tavily,
+        calculate_r_multiples,
+        calculate_technical_stops,
+        calculate_position_size,
     ]
     return tools
 

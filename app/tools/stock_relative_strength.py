@@ -1,34 +1,13 @@
 from typing import List
 from datetime import datetime, timedelta
 
-from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain.agents import tool
-from openbb import obb
 
 import pandas as pd
 import numpy as np
 
-from app.tools.utils import wrap_dataframe
-
-
-def fetch_stock_data(
-    symbol: str, start_date: datetime, end_date: datetime
-) -> pd.DataFrame:
-    return obb.equity.price.historical(
-        symbol,
-        start_date=start_date.strftime("%Y-%m-%d"),
-        end_date=end_date.strftime("%Y-%m-%d"),
-        provider="yfinance",
-    ).to_df()
-
-
-def fetch_sp500_data(start_date: datetime, end_date: datetime) -> pd.DataFrame:
-    return obb.equity.price.historical(
-        "^GSPC",
-        start_date=start_date.strftime("%Y-%m-%d"),
-        end_date=end_date.strftime("%Y-%m-%d"),
-        provider="yfinance",
-    ).to_df()
+from app.tools.utils import wrap_dataframe, fetch_stock_data, fetch_sp500_data
+from app.tools.types import StockStatsInput
 
 
 def calculate_performance(data: pd.DataFrame) -> float:
@@ -77,10 +56,6 @@ def calculate_rs_rating(
 
     rs_df = pd.DataFrame({"Interval": intervals, "RS_Rating": rs_ratings})
     return rs_df
-
-
-class StockStatsInput(BaseModel):
-    symbol: str = Field(..., description="The stock symbol to analyze")
 
 
 @tool(args_schema=StockStatsInput)

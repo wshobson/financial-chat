@@ -2,7 +2,7 @@ import os
 import warnings
 import pandas as pd
 
-warnings.filterwarnings("ignore", category=FutureWarning)
+warnings.filterwarnings("ignore")
 
 from langchain_community.callbacks.streamlit import StreamlitCallbackHandler
 from langchain_core.runnables import RunnableConfig
@@ -18,6 +18,9 @@ load_dotenv()
 
 obb.account.login(pat=os.environ.get("OPENBB_TOKEN"), remember_me=True)
 obb.user.credentials.tiingo_token = os.environ.get("TIINGO_API_KEY")
+obb.user.credentials.fmp_api_key = os.environ.get("FMP_API_KEY")
+obb.user.credentials.intrinio_api_key = os.environ.get("INTRINIO_API_KEY")
+obb.user.credentials.fred_api_key = os.environ.get("FRED_API_KEY")
 
 pd.set_option("display.max_columns", None)
 pd.set_option("display.max_rows", None)

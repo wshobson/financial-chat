@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta
 
-from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain.agents import tool
 from openbb import obb
 import quantstats as qs
@@ -9,10 +8,7 @@ import pandas as pd
 from app.features.technical import add_technicals
 from app.features.screener import fetch_custom_universe
 from app.tools.utils import wrap_dataframe
-
-
-class StockStatsInput(BaseModel):
-    symbol: str = Field(..., description="Stock symbol to fetch data for")
+from app.tools.types import StockStatsInput
 
 
 @tool(args_schema=StockStatsInput)
@@ -114,14 +110,14 @@ def get_key_metrics(symbol: str) -> str:
     """Fetch Fundamental Metrics by Symbol."""
 
     try:
-        metrics = obb.equity.fundamental.metrics(symbol=symbol, with_ttm=True).to_df()[
-            ::-1
-        ]
+        metrics = obb.equity.fundamental.metrics(
+            symbol=symbol, with_ttm=True, provider="yfinance"
+        ).to_df()
 
         if metrics.empty:
             return f"\n<observation>\nNo data found for the given symbol {symbol}\n</observation>\n"
 
-        return wrap_dataframe(metrics)
+        return wrap_dataframe(metrics[::-1])
     except Exception as e:
         return f"\n<observation>\nError: {e}\n</observation>\n"
 

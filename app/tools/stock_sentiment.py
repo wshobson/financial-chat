@@ -1,13 +1,8 @@
-from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain.agents import tool
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from openbb import obb
 
 from app.tools.utils import wrap_dataframe
-
-
-class StockStatsInput(BaseModel):
-    symbol: str = Field(..., description="Stock symbol to fetch data for")
 
 
 def analyze_sentiment(text):
@@ -33,7 +28,9 @@ def get_news_sentiment(symbol: str) -> str:
         df = obb.news.company(symbol=symbol, provider="tiingo", limit=10).to_df()
 
         if df.empty:
-            return "\n<observation>\nNo data found for the given symbol\n</observation>\n"
+            return (
+                "\n<observation>\nNo data found for the given symbol\n</observation>\n"
+            )
 
         if "text" in df.columns:
             df["sentiment_score"] = df["text"].apply(analyze_sentiment)
