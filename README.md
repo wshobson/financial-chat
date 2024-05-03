@@ -21,6 +21,8 @@ If you're curious about the journey of building this project, check out these bl
 - Provides stock price history, quantitative stats, and more
 - Calculates relative strength for stocks
 - Sentiment analysis on news articles
+- Universe scanning using FinViz filters
+- Risk management techniques using technically-derived stops and R Multiples
 - Interactive Streamlit UI for chat-based interaction
 
 ## Installation
