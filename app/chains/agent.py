@@ -1,11 +1,12 @@
-from typing import List, Tuple
+from typing import Annotated, TypedDict
 
-from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_anthropic import ChatAnthropic
-from langchain.agents import AgentExecutor, create_tool_calling_agent
 from langchain_community.tools.tavily_search import TavilySearchResults
 from langchain_core.prompts import ChatPromptTemplate
-
+from langgraph.graph import END, StateGraph
+from langgraph.prebuilt.tool_node import tools_condition
+from langchain_core.runnables import Runnable, RunnableConfig
+from langgraph.graph.message import AnyMessage, add_messages
 from dotenv import load_dotenv
 
 from app.tools.stock_stats import (
@@ -27,54 +28,46 @@ from app.tools.risk_management import (
     calculate_technical_stops,
     calculate_position_size,
 )
+from app.tools.utils import create_tool_node_with_fallback
+from app.chains.templates import SYSTEM_TEMPLATE
 
 load_dotenv()
 
-SYSTEM_TEMPLATE = """
-You are a specialized financial advisor with advanced knowledge of trading, investing, quantitative finance, technical analysis, and fundamental analysis.
 
-You should never perform any math on your own, but rather use the tools available to you to perform all calculations.
+class AgentState(TypedDict):
+    messages: Annotated[list[AnyMessage], add_messages]
 
-CRITERIA FOR BULLISH SETUPS:
-----------------------------
 
-You will find below the criteria to use for classification of bullish setups in the stock market. Any trading setups should 
-be based off the daily timeframe and the most recent data.
+class Assistant:
+    def __init__(self, runnable: Runnable):
+        self.runnable = runnable
 
-Rules for bullish setups based on the stock's most recent closing price:
-1. Stock's closing price is greater than its 20 SMA.
-2. Stock's closing price is greater than its 50 SMA.
-3. Stock's closing price is greater than its 200 SMA.
-4. Stock's 50 SMA is greater than its 150 SMA.
-5. Stock's 150 SMA is greater than its 200 SMA.
-6. Stock's 200 SMA is trending up for at least 1 month.
-7. Stock's closing price is at least 30 percent above 52-week low.
-8. Stock's closing price is within 25 percent of its 52-week high.
-9. Stock's 30-day average volume is greater than 750K.
-10. Stock's ADR percent is less than 5 percent and greater than 1 percent.
-11. Stock's trendline slope is positive and rising.
-12. Stock's relative strength rank is above 80.
+    def __call__(self, state: AgentState, config: RunnableConfig):
+        while True:
+            result = self.runnable.invoke(state)
 
-PREPROCESSING:
---------------
-
-Before processing the query, you will preprocess it as follows:
-1. Correct any spelling errors using a spell checker or fuzzy matching technique.
-2. If the stock symbol or company name is a partial match, find the closest matching stock symbol or company name."""
+            if not result.tool_calls and (
+                not result.content
+                or isinstance(result.content, list)
+                and not result.content[0].get("text")
+            ):
+                messages = state["messages"] + [("user", "Respond with a real output.")]
+                state = {**state, "messages": messages}
+            else:
+                break
+        return {"messages": result}
 
 
 def get_prompt():
     return ChatPromptTemplate.from_messages(
         [
-            ("user", SYSTEM_TEMPLATE),
-            ("placeholder", "{chat_history}"),
-            ("human", "{input}"),
-            ("placeholder", "{agent_scratchpad}"),
+            ("system", SYSTEM_TEMPLATE),
+            ("placeholder", "{messages}"),
         ]
     )
 
 
-def get_tools(llm):
+def get_tools():
     tavily = TavilySearchResults(max_results=1)
 
     tools = [
@@ -98,32 +91,27 @@ def get_tools(llm):
     return tools
 
 
-def create_anthropic_agent_executor():
-    llm = ChatAnthropic(
-        temperature=0,
-        model_name="claude-3-opus-20240229",
-        max_tokens=4096,
-    )
+def create_anthropic_agent_graph():
+    llm = ChatAnthropic(temperature=0, model_name="claude-3-opus-20240229")
 
-    tools = get_tools(llm)
+    tools = get_tools()
     prompt = get_prompt()
 
-    agent = create_tool_calling_agent(llm, tools, prompt)
+    llm_with_tools = prompt | llm.bind_tools(tools)
 
-    return AgentExecutor.from_agent_and_tools(
-        agent=agent,
-        tools=tools,
-        verbose=True,
-        return_intermediate_steps=True,
-        handle_parsing_errors=True,
+    builder = StateGraph(AgentState)
+
+    builder.add_node("assistant", Assistant(llm_with_tools))
+    builder.add_node("action", create_tool_node_with_fallback(tools))
+
+    builder.set_entry_point("assistant")
+
+    builder.add_conditional_edges(
+        "assistant",
+        tools_condition,
+        {"action": "action", END: END},
     )
+    builder.add_edge("action", "assistant")
 
-
-class AgentInput(BaseModel):
-    input: str
-    chat_history: List[Tuple[str, str]] = Field(..., extra={"widget": {"type": "chat"}})
-
-
-def get_anthropic_agent_executor_chain():
-    executor = create_anthropic_agent_executor()
-    return executor.with_types(input_type=AgentInput) | (lambda x: x["output"])
+    graph = builder.compile()
+    return graph

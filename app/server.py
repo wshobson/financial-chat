@@ -1,18 +1,21 @@
-import os
-import warnings
-import pandas as pd
-
-warnings.filterwarnings("ignore")
+from typing import List, Any, Union
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
+from langchain_core.pydantic_v1 import BaseModel, Field
+from langchain_core.messages import HumanMessage, AIMessage
 from langserve import add_routes
 from openbb import obb
 from dotenv import load_dotenv
 
+import os
+import warnings
+import pandas as pd
 
-from app.chains.agent import get_anthropic_agent_executor_chain
+from app.chains.agent import create_anthropic_agent_graph
+
+warnings.filterwarnings("ignore")
 
 load_dotenv()
 
@@ -41,6 +44,20 @@ app.add_middleware(
     expose_headers=["*"],
 )
 
+graph = create_anthropic_agent_graph()
+
+
+class AgentInput(BaseModel):
+    messages: List[Union[HumanMessage, AIMessage]] = Field(
+        ...,
+        description="The chat messages representing the current conversation.",
+        extra={"widget": {"type": "chat", "input": "messages"}},
+    )
+
+
+class AgentOutput(BaseModel):
+    output: Any
+
 
 @app.get("/")
 async def redirect_root_to_docs():
@@ -49,8 +66,10 @@ async def redirect_root_to_docs():
 
 add_routes(
     app,
-    get_anthropic_agent_executor_chain(),
-    path="/agent",
+    graph,
+    path="/chat",
+    input_type=AgentInput,
+    output_type=AgentOutput,
 )
 
 if __name__ == "__main__":

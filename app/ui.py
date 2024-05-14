@@ -1,18 +1,23 @@
-import os
-import warnings
-import pandas as pd
+from typing import Callable, TypeVar
 
-warnings.filterwarnings("ignore")
-
+from streamlit.runtime.scriptrunner import add_script_run_ctx, get_script_run_ctx
+from streamlit.delta_generator import DeltaGenerator
 from langchain_community.callbacks.streamlit import StreamlitCallbackHandler
 from langchain_core.runnables import RunnableConfig
 from openbb import obb
 from dotenv import load_dotenv
 
+from app.chains.clear_results import with_clear_container
+from app.chains.agent import create_anthropic_agent_graph
+
+import os
+import warnings
+import inspect
+import uuid
+import pandas as pd
 import streamlit as st
 
-from app.chains.clear_results import with_clear_container
-from app.chains.agent import create_anthropic_agent_executor
+warnings.filterwarnings("ignore")
 
 load_dotenv()
 
@@ -33,8 +38,30 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-if "agent_executor" not in st.session_state:
-    st.session_state.agent_executor = create_anthropic_agent_executor()
+T = TypeVar("T")
+
+
+def get_streamlit_cb(parent_container: DeltaGenerator):
+    def decor(fn: Callable[..., T]) -> Callable[..., T]:
+        ctx = get_script_run_ctx()
+
+        def wrapper(*args, **kwargs) -> T:
+            add_script_run_ctx(ctx=ctx)
+            return fn(*args, **kwargs)
+
+        return wrapper
+
+    st_cb = StreamlitCallbackHandler(parent_container=parent_container)
+
+    for name, fn in inspect.getmembers(st_cb, predicate=inspect.ismethod):
+        if name.startswith("on_"):
+            setattr(st_cb, name, decor(fn))
+
+    return st_cb
+
+
+if "graph" not in st.session_state:
+    st.session_state.graph = create_anthropic_agent_graph()
 
 st.title("Financial Chat, your AI financial advisor 📈")
 
@@ -61,17 +88,16 @@ if with_clear_container(submit_clicked):
     st.session_state.messages.append({"role": "user", "content": user_input})
 
     answer_container = output_container.chat_message("assistant", avatar="💸")
-    st_callback = StreamlitCallbackHandler(answer_container)
+    st_callback = get_streamlit_cb(answer_container)
 
     cfg = RunnableConfig()
     cfg["callbacks"] = [st_callback]
+    cfg["configurable"] = {"thread_id": uuid.uuid4()}
 
-    answer = st.session_state.agent_executor.invoke(
-        {"input": user_input, "chat_history": st.session_state.messages}, cfg
-    )
+    question = {"messages": ("user", user_input)}
 
-    if isinstance(answer, dict) and "output" in answer:
-        st.session_state.messages.append(
-            {"role": "assistant", "content": answer["output"]}
-        )
-        answer_container.markdown(f"**Assistant:** {answer['output']}")
+    response = st.session_state.graph.invoke(question, cfg)
+    answer = response["messages"][-1].content
+
+    st.session_state.messages.append({"role": "assistant", "content": answer})
+    answer_container.write(answer)
