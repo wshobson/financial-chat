@@ -13,6 +13,7 @@ If you're curious about the journey of building this project, check out these bl
 - [Seeing the Bigger Picture: Adding Chart-Based Technical Analysis](https://sethhobson.com/2024/04/seeing-the-bigger-picture-adding-chart-based-technical-analysis)
 - [Empowering the AI Stock Analysis Agent with Universe Scanning](https://sethhobson.com/2024/04/empowering-the-ai-stock-analysis-agent-with-universe-scanning)
 - [Risk Management in AI Stock Trading: A Key to Success](https://sethhobson.com/2024/05/risk-management-in-ai-stock-trading-a-key-to-success)
+- [Converting the AI Stock AgentExecutor to LangGraph](https://sethhobson.com/2024/05/converting-ai-stock-agentexecutor-to-langgraph)
 
 ## Features
 
