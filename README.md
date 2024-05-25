@@ -91,3 +91,7 @@ docker run -p 8080:8080 --env-file .env financial-chat
 - `Dockerfile`: Dockerfile for building the application
 - `pyproject.toml`: Project dependencies and configuration
 - `README.md`: Project documentation
+
+## Flowchart
+
+![Flowchart](graph_mermaid_image.png)

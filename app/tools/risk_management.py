@@ -55,7 +55,7 @@ def calculate_technical_stops(symbol: str) -> str:
 
 @tool(args_schema=RMultipleInput)
 def calculate_r_multiples(
-    symbol: str, entry_price: float, stop_price: float, risk_multiple: int
+    symbol: str, entry_price: float, stop_price: float, risk_multiple: int = 2
 ) -> str:
     """Calculate potential profit targets and stop-losses based on R multiples."""
 
@@ -72,10 +72,10 @@ def calculate_r_multiples(
 @tool(args_schema=PositionSizingInput)
 def calculate_position_size(
     symbol: str,
-    account_size: float,
-    risk_percent: float,
     entry_price: float,
     stop_price: float,
+    account_size: float = 100000.00,
+    risk_percent: float = 1.0,
 ) -> str:
     """Calculate the optimal position size for a trade based on account size and risk tolerance."""
 

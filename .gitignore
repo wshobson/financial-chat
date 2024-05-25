@@ -29,3 +29,6 @@ archive.zip
 # macOS
 .DS_Store
 .env
+
+# misc
+graph_output.json
