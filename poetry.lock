@@ -3457,6 +3457,22 @@ test = ["hypothesis (>=6.46.1)", "pytest (>=7.3.2)", "pytest-xdist (>=2.2.0)"]
 xml = ["lxml (>=4.9.2)"]
 
 [[package]]
+name = "pandas-datareader"
+version = "0.10.0"
+description = "Data readers extracted from the pandas codebase,should be compatible with recent pandas versions"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "pandas-datareader-0.10.0.tar.gz", hash = "sha256:9fc3c63d39bc0c10c2683f1c6d503ff625020383e38f6cbe14134826b454d5a6"},
+    {file = "pandas_datareader-0.10.0-py3-none-any.whl", hash = "sha256:0b95ff3635bc3ee1a6073521b557ab0e3c39d219f4a3b720b6b0bc6e8cdb4bb7"},
+]
+
+[package.dependencies]
+lxml = "*"
+pandas = ">=0.23"
+requests = ">=2.19.0"
+
+[[package]]
 name = "pandas-ta"
 version = "0.3.14b"
 description = "An easy to use Python 3 Pandas Extension with 130+ Technical Analysis Indicators. Can be called from a Pandas DataFrame or standalone like TA-Lib. Correlation tested with TA-Lib."
@@ -5868,4 +5884,4 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.12"
-content-hash = "fdd05e7db8272ef93f628da9cfe0a757eecab131bdb4a042b40de8ea2deb0b3c"
+content-hash = "381a2e064335ce19ebd5caa25aec563492f93fa464ddc37a2ef57afc6c00be88"

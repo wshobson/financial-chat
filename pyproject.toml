@@ -34,6 +34,7 @@ langsmith = "^0.1.63"
 langgraph = "^0.0.55"
 openbb-oecd = "1.1.1"
 langchain-community = "^0.2.1"
+pandas-datareader = "^0.10.0"
 
 
 [build-system]

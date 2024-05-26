@@ -2,13 +2,42 @@ from datetime import datetime, timedelta
 
 from langchain.agents import tool
 from openbb import obb
-import quantstats as qs
-import pandas as pd
+from pandas_datareader import data as pdr
 
 from app.features.technical import add_technicals
 from app.features.screener import fetch_custom_universe
 from app.tools.utils import wrap_dataframe
 from app.tools.types import StockStatsInput
+
+import quantstats as qs
+import pandas as pd
+import yfinance as yf
+
+yf.pdr_override()
+
+
+def fetch_and_convert_ohlc(symbol: str, start_date: str) -> pd.DataFrame:
+    """
+    Fetch stock data using pandas_datareader and convert OHLC columns to lower case.
+
+    Args:
+        symbol (str): The stock symbol to fetch data for.
+        start_date (str): The start date for fetching data in 'YYYY-MM-DD' format.
+
+    Returns:
+        pd.DataFrame: DataFrame with OHLC columns in lower case.
+    """
+    try:
+        df = pdr.get_data_yahoo(symbol, start=start_date)
+        df.index = pd.to_datetime(df.index)
+
+        df.columns = [col.lower() for col in df.columns]
+        df["close"] = df["adj close"]
+
+        return df
+    except Exception as e:
+        print(f"Error fetching data for {symbol}: {e}")
+        return pd.DataFrame()
 
 
 @tool(args_schema=StockStatsInput)
@@ -17,10 +46,7 @@ def get_stock_price_history(symbol: str) -> str:
 
     try:
         start_date = (datetime.now() - timedelta(days=365 * 2)).strftime("%Y-%m-%d")
-        df = obb.equity.price.historical(
-            symbol, start_date=start_date, provider="yfinance"
-        ).to_df()
-        df.index = pd.to_datetime(df.index)
+        df = fetch_and_convert_ohlc(symbol, start_date)
 
         if df.empty:
             return (
@@ -41,10 +67,7 @@ def get_stock_quantstats(symbol: str) -> str:
 
     try:
         start_date = (datetime.now() - timedelta(days=365 * 2)).strftime("%Y-%m-%d")
-        df = obb.equity.price.historical(
-            symbol, start_date=start_date, provider="yfinance"
-        ).to_df()
-        df.index = pd.to_datetime(df.index)
+        df = fetch_and_convert_ohlc(symbol, start_date)
 
         if df.empty:
             return f"\n<observation>\nNo data found for the given symbol {symbol}\n</observation>\n"
@@ -154,7 +177,7 @@ def get_valuation_multiples(symbol: str) -> str:
 
 @tool
 def get_stock_universe() -> str:
-    """Fetch the Trending Stocks Universe from FinViz."""
+    """Fetch Bullish Trending Stocks Universe from FinViz."""
 
     try:
         return wrap_dataframe(fetch_custom_universe())

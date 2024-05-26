@@ -90,7 +90,7 @@ if with_clear_container(submit_clicked):
     answer_container = output_container.chat_message("assistant", avatar="💸")
     st_callback = get_streamlit_cb(answer_container)
 
-    cfg = RunnableConfig()
+    cfg = RunnableConfig(recursion_limit=150)
     cfg["callbacks"] = [st_callback]
     cfg["configurable"] = {"thread_id": uuid.uuid4()}
 

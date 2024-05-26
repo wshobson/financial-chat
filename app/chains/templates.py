@@ -14,8 +14,9 @@ The user is not aware of the different specialized assistants, so do not mention
 
 
 END_TEMPLATE = """
-If the user needs help, and none of your tools are appropriate for it, then "CompleteOrEscalate" the dialog to the host assistant.
-Do not waste the user's time. Do not make up invalid tools or functions."""
+If the user needs help, and none of your tools are appropriate for it, then say you don't know.
+Do not waste the user's time. Do not make up invalid tools or functions.
+You may only call each tool once."""
 
 
 CRITERIA_TEMPLATE = """
@@ -43,6 +44,8 @@ Rules for bullish setups based on the stock's most recent closing price:
 FULL_ANALYSIS_TEMPLATE = f"""
 You will perform a full analysis of the requested stock.
 
+Don't ask the user for any input to do this. Use the criteria and the tools below for analysis.
+
 {CRITERIA_TEMPLATE}
 
 STEPS:
@@ -62,13 +65,22 @@ STEPS:
 CHART_ANALYSIS_TEMPLATE = f"""
 You will perform a chart analysis of the requested stock.
 
-{CRITERIA_TEMPLATE}
-
 {END_TEMPLATE}"""
 
 
 SCAN_TEMPLATE = f"""
-You will perform a scan of the stock market universe and return a list of stocks that meet the criteria.
+You will perform a scan of the stock market universe and analyze the first 5 stocks in the list, sorted by Market Cap.
+
+Don't ask the user for any input to do this. Use the criteria below and the tools below for analysis.
+
+{CRITERIA_TEMPLATE}
+
+STEPS:
+------
+
+1. Scan the stock market universe and return a list of stocks.
+2. Get the latest price history for the first 5 stocks in the list. Each stock must use a separate function call.
+3. Calculate fundamental metrics using QuantStats for the first 5 stocks in the list. Each stock must use a separate function call.
 
 {END_TEMPLATE}"""
 
@@ -78,9 +90,10 @@ You will perform a risk assessment of the requested stock.
 STEPS:
 ------
 
-1. Calculate technical stop loss levels.
-2. Calulate R multiples for 1R, 2R, 3R, and 4R.
-3. Calculate position size. 
+1. Get the latest price history for the requested stock.
+2. Calculate technical stop loss levels.
+3. Calulate R multiples for 1R, 2R, 3R, and 4R.
+4. Calculate position size. 
 
 Use $100,000 account size and 1% risk percentage unless the user provides these values.
 

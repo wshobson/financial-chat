@@ -65,27 +65,19 @@ class AgentState(TypedDict):
 class ToFullScanAssistant(BaseModel):
     """Transfers work to a specialized assistant to handle a stock universe scan."""
 
-    request: str = Field(
-        description="Any necessary followup questions the scan assistant should clarify before proceeding."
-    )
+    symbol: str = Field(description="The symbol of the stock to analyze.")
 
 
 class ToFullAnalysisAssistant(BaseModel):
     """Transfers work to a specialized assistant to handle a full analysis of a stock."""
 
     symbol: str = Field(description="The symbol of the stock to analyze.")
-    request: str = Field(
-        description="Any necessary followup questions the analysis assistant should clarify before proceeding."
-    )
 
 
 class ToChartAnalysisAssistant(BaseModel):
     """Transfers work to a specialized assistant to handle a chart analysis of a stock."""
 
     symbol: str = Field(description="The symbol of the stock to analyze.")
-    request: str = Field(
-        description="Any necessary followup questions the chart assistant should clarify before proceeding."
-    )
 
 
 class ToRiskManagementAssistant(BaseModel):
@@ -134,7 +126,7 @@ def create_full_scan_agent(llm: Runnable) -> Assistant:
             ("placeholder", "{messages}"),
         ]
     )
-    scan_tools = [get_stock_universe]
+    scan_tools = [get_stock_universe, get_stock_price_history, get_stock_quantstats]
     runnable = prompt | llm.bind_tools(scan_tools)
     return Assistant(runnable)
 
@@ -188,7 +180,7 @@ def create_risk_management_agent(llm: Runnable) -> Assistant:
     return Assistant(runnable)
 
 
-def create_gainers_losers_agent(llm):
+def create_gainers_losers_agent(llm: Runnable) -> Assistant:
     prompt = ChatPromptTemplate.from_messages(
         [
             ("system", GAINERS_LOSERS_TEMPLATE),
@@ -309,7 +301,7 @@ def route_primary_assistant(state: AgentState) -> Literal[
     raise ValueError("Invalid route")
 
 
-def create_anthropic_agent_graph():
+def create_anthropic_agent_graph() -> StateGraph:
     llm = ChatAnthropic(temperature=0, model_name="claude-3-opus-20240229")
 
     builder = StateGraph(AgentState)
@@ -322,7 +314,10 @@ def create_anthropic_agent_graph():
     builder.add_node("scan_stocks", create_full_scan_agent(llm))
     builder.add_edge("enter_scan_stocks", "scan_stocks")
     builder.add_node(
-        "scan_stocks_tools", create_tool_node_with_fallback([get_stock_universe])
+        "scan_stocks_tools",
+        create_tool_node_with_fallback(
+            [get_stock_universe, get_stock_price_history, get_stock_quantstats]
+        ),
     )
     builder.add_edge("scan_stocks_tools", "scan_stocks")
     builder.add_conditional_edges("scan_stocks", should_continue)
@@ -343,7 +338,6 @@ def create_anthropic_agent_graph():
                 get_stock_ratios,
                 get_stock_sector_info,
                 get_valuation_multiples,
-                get_news_sentiment,
                 get_news_sentiment,
                 get_relative_strength,
                 get_stock_quantstats,
@@ -377,7 +371,11 @@ def create_anthropic_agent_graph():
     builder.add_node(
         "risk_management_tools",
         create_tool_node_with_fallback(
-            [calculate_technical_stops, calculate_r_multiples, calculate_position_size]
+            [
+                calculate_technical_stops,
+                calculate_r_multiples,
+                calculate_position_size,
+            ]
         ),
     )
     builder.add_edge("risk_management_tools", "risk_management")
