@@ -2,6 +2,7 @@ from typing import Annotated, TypedDict, Optional, Literal, Callable
 
 from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_anthropic import ChatAnthropic
+from langchain_aws import ChatBedrock
 from langchain_community.tools.tavily_search import TavilySearchResults
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import Runnable, RunnableConfig
@@ -303,6 +304,12 @@ def route_primary_assistant(state: AgentState) -> Literal[
 
 def create_anthropic_agent_graph() -> StateGraph:
     llm = ChatAnthropic(temperature=0, model_name="claude-3-opus-20240229")
+    # llm = ChatBedrock(
+    #     region_name="us-east-1",
+    #     credentials_profile_name="deploy",
+    #     model_id="anthropic.claude-3-sonnet-20240229-v1:0",
+    #     model_kwargs={"temperature": 0},
+    # )
 
     builder = StateGraph(AgentState)
 

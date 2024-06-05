@@ -1,0 +1,60 @@
+# The manifest for the "financial-chat-backend" service.
+# Read the full specification for the "Load Balanced Web Service" type at:
+#  https://aws.github.io/copilot-cli/docs/manifest/lb-web-service/
+
+# Your service name will be used in naming your resources like log groups, ECS services, etc.
+name: financial-chat-api
+type: Load Balanced Web Service
+
+# Distribute traffic to your service.
+http:
+  # Requests to this path will be forwarded to your service.
+  # To match all requests you can use the "/" path.
+  path: '/'
+  # You can specify a custom health check path. The default is "/".
+  healthcheck: '/health'
+
+# Configuration for your containers and service.
+image:
+  # Docker build arguments. For additional overrides: https://aws.github.io/copilot-cli/docs/manifest/lb-web-service/#image-build
+  build: api.dockerfile
+  # Port exposed through your container to route traffic to it.
+  port: 8080
+
+cpu: 1024       # Number of CPU units for the task.
+memory: 4096    # Amount of memory in MiB used by the task.
+platform: linux/x86_64  # See https://aws.github.io/copilot-cli/docs/manifest/lb-web-service/#platform
+count: 1       # Number of tasks that should be running in your service.
+exec: true     # Enable running commands in your container.
+network:
+  connect: true # Enable Service Connect for intra-environment traffic between services.
+
+# storage:
+  # readonly_fs: true       # Limit to read-only access to mounted root filesystems.
+
+# Optional fields for more advanced use-cases.
+#
+variables:                    # Pass environment variables as key value pairs.
+  LOG_LEVEL: debug
+
+secrets:                      # Pass secrets from AWS Systems Manager (SSM) Parameter Store.
+  LANGCHAIN_TRACING_V2: /copilot/financial-chat/test/secrets/langchain_tracing
+  LANGCHAIN_ENDPOINT: /copilot/financial-chat/test/secrets/langchain_endpoint
+  LANGCHAIN_API_KEY: /copilot/financial-chat/test/secrets/langchain_api_key
+  LANGCHAIN_PROJECT: /copilot/financial-chat/test/secrets/langchain_project
+  OPENAI_API_KEY: /copilot/financial-chat/test/secrets/openai_api_key
+  IMGUR_CLIENT_ID: /copilot/financial-chat/test/secrets/imgur_client_id
+  IMGUR_CLIENT_SECRET: /copilot/financial-chat/test/secrets/imgur_client_secret
+  TAVILY_API_KEY: /copilot/financial-chat/test/secrets/tavily_api_key
+  TIINGO_API_KEY: /copilot/financial-chat/test/secrets/tiingo_api_key
+  FMP_API_KEY: /copilot/financial-chat/test/secrets/fmp_api_key
+  INTRINIO_API_KEY: /copilot/financial-chat/test/secrets/intrinio_api_key
+  ANTHROPIC_API_KEY: /copilot/financial-chat/test/secrets/anthropic_api_key
+  OPENBB_TOKEN: /copilot/financial-chat/test/secrets/openbb_token
+
+# You can override any of the values defined above by environment.
+#environments:
+#  test:
+#    count: 2               # Number of tasks to run for the "test" environment.
+#    deployment:            # The deployment strategy for the "test" environment.
+#       rolling: 'recreate' # Stops existing tasks before new ones are started for faster deployments.

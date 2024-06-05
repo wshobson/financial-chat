@@ -15,6 +15,7 @@ If you're curious about the journey of building this project, check out these bl
 - [Risk Management in AI Stock Trading: A Key to Success](https://sethhobson.com/2024/05/risk-management-in-ai-stock-trading-a-key-to-success)
 - [Converting the AI Stock AgentExecutor to LangGraph](https://sethhobson.com/2024/05/converting-ai-stock-agentexecutor-to-langgraph)
 - [Unleashing the Power of Multiple Agents with LangGraph](https://sethhobson.com/2024/05/unleashing-the-power-of-multiple-agents-with-langgraph)
+- [Deploying the AI Stock Analysis Agent on AWS with Copilot](https://sethhobson.com/2024/06/deploying-the-ai-stock-analysis-agent-on-aws-with-copilot)
 
 ## Features
 
@@ -27,6 +28,7 @@ If you're curious about the journey of building this project, check out these bl
 - Risk management techniques using technically-derived stops and R Multiples
 - Interactive Streamlit UI for chat-based interaction
 - Multiple Agent Workflows using LangGraph
+- Deployment to AWS with the Copilot CLI
 
 ## Installation
 
